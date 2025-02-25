@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginFormSchema } from "@/lib/schemas/login-form-schema";
+import JUAILogo from "../../public/images/juai-logo.png";
+import Image from "next/image";
 
 export default function LoginForm() {
   // 1. Define your form.
@@ -35,10 +37,11 @@ export default function LoginForm() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
+        <Image
           alt="Your Company"
-          src="https://res.cloudinary.com/dg0cutpeq/image/upload/v1740495092/juai-logo_gvzw3z.png"
+          src={JUAILogo}
           className="mx-auto h-44 w-auto"
+          priority
         />
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
           Sign in to your account
@@ -82,7 +85,9 @@ export default function LoginForm() {
                 </>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" className="w-full" size="lg">
+              Sign in
+            </Button>
           </form>
         </Form>
       </div>

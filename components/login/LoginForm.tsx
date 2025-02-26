@@ -16,22 +16,66 @@ import { Input } from "@/components/ui/input";
 import { LoginFormSchema } from "@/lib/schemas/login-form-schema";
 import JUAILogo from "../../public/images/juai-logo.png";
 import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import { useState } from "react";
 
 export default function LoginForm() {
+  // declare states ...
+  const [showDialog, setShowDialog] = useState(false);
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof LoginFormSchema>>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
-      username: "",
+      email_address: "",
       password: "",
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof LoginFormSchema>) {
+  async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email_address,
+          password: values.password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        form.setError("email_address", { message: "" });
+        form.setError("password", {
+          type: "manual",
+          message: data.message,
+        });
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      // secure and store the token here ...
+      setShowDialog(true);
+    } catch (error) {
+      console.error("Login error:", error);
+      form.setError("password", {
+        type: "manual",
+        message: "Something went wrong. Please try again later.",
+      });
+    }
   }
 
   return (
@@ -53,7 +97,7 @@ export default function LoginForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="username"
+              name="email_address"
               render={({ field }) => (
                 <>
                   <FormItem>
@@ -90,6 +134,23 @@ export default function LoginForm() {
             </Button>
           </form>
         </Form>
+
+        {/* temporarily displaying a modal */}
+        <AlertDialog open={showDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Information</AlertDialogTitle>
+              <AlertDialogDescription>
+                Successfully Logged In!
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setShowDialog(false)}>
+                Got it!
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

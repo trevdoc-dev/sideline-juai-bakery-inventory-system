@@ -15,24 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoginFormSchema } from "@/lib/schemas/login-form-schema";
 import JUAILogo from "../../public/images/juai-logo.png";
-import Image from "next/image";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
 import { useState } from "react";
+import Image from "next/image";
+import { useAuth } from "@/context/AuthProvider";
 
 export default function LoginForm() {
-  // declare states ...
-  const [showDialog, setShowDialog] = useState(false);
-
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof LoginFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
       email_address: "",
@@ -40,49 +28,40 @@ export default function LoginForm() {
     },
   });
 
-  // 2. Define a submit handler.
+  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    setLoading(true);
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: values.email_address,
+        password: values.password,
+      }),
+    });
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: values.email_address,
-          password: values.password,
-        }),
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-      if (!res.ok) {
-        form.setError("email_address", { message: "" });
-        form.setError("password", {
-          type: "manual",
-          message: data.message,
-        });
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      // secure and store the token here ...
-      setShowDialog(true);
-    } catch (error) {
-      console.error("Login error:", error);
+    setLoading(false);
+    if (!res.ok) {
       form.setError("password", {
         type: "manual",
-        message: "Something went wrong. Please try again later.",
+        message: "Invalid email or password",
       });
+      return;
     }
+
+    // store token in local storage
+    login(data.token);
   }
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <Image
-          alt="Your Company"
+          alt="JU&AI Bakeshop Inventory System LOGO"
           src={JUAILogo}
           className="mx-auto h-44 w-auto"
           priority
@@ -99,58 +78,53 @@ export default function LoginForm() {
               control={form.control}
               name="email_address"
               render={({ field }) => (
-                <>
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Email address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </>
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Email address"
+                      {...field}
+                      className={
+                        form.formState.errors.email_address
+                          ? "border-red-500"
+                          : ""
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
-                <>
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Password"
-                        {...field}
-                        type="password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </>
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Password"
+                      {...field}
+                      type="password"
+                      className={
+                        form.formState.errors.password ? "border-red-500" : ""
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" size="lg">
-              Sign in
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={loading}
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </Form>
-
-        {/* temporarily displaying a modal */}
-        <AlertDialog open={showDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Information</AlertDialogTitle>
-              <AlertDialogDescription>
-                Successfully Logged In!
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setShowDialog(false)}>
-                Got it!
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );

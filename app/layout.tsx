@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { AuthProvider } from "@/context/AuthProvider";
 import "./globals.css";
 
 const poppinsFont = Poppins({
-  weight: ["400", "700"], // Specify desired weights
-  subsets: ["latin"], // Optional: Specify character subsets
-  variable: "--font-poppins", // Create a CSS variable for dynamic styling [1, 5, 7]
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppinsFont.className} antialiased`}>{children}</body>
+      <body className={`${poppinsFont.className} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

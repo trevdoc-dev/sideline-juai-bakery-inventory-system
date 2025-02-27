@@ -2,34 +2,50 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+
+interface User {
+  userId: number;
+  email: string;
+  iat: number;
+  exp: number;
+}
 
 interface AuthContextType {
-  user: {
-    userId: number;
-    email: string;
-    iat: number;
-    exp: number;
-  };
+  user: User | null;
   login: (token: string) => void;
   logout: () => void;
+  isAuthLoaded: boolean; // NEW: Track if auth is initialized
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false); // NEW: Ensure hydration is complete
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
-      setUser({ token }); // Replace with actual user data if needed
+      try {
+        const decodedUser = jwtDecode<User>(token);
+        setUser(decodedUser);
+      } catch (error) {
+        console.error("Invalid token", error);
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     }
+
+    setIsAuthLoaded(true); // Mark auth as fully loaded
   }, []);
 
   const login = (token: string) => {
     localStorage.setItem("token", token);
-    setUser({ token });
+    const decodedUser = jwtDecode<User>(token);
+    setUser(decodedUser);
     router.push("/auth");
   };
 
@@ -40,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthLoaded }}>
       {children}
     </AuthContext.Provider>
   );

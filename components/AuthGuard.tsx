@@ -1,23 +1,31 @@
 "use client";
 
 import { useAuth } from "@/context/AuthProvider";
+import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isAuthLoaded } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      router.replace("/login");
-    } else {
-      setLoading(false);
+    if (isAuthLoaded) {
+      if (!user) {
+        router.replace("/login");
+      }
+      setIsChecking(false);
     }
-  }, [user, router]);
+  }, [user, isAuthLoaded, router]);
 
-  if (loading) return <div>Loading...</div>;
+  if (isChecking) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <LoaderCircle className="h-12 w-12 animate-spin text-gray-600" />
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

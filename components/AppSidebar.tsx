@@ -1,4 +1,10 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  ChartColumnIncreasing,
+  Croissant,
+  Home,
+  ScrollText,
+  Settings,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -19,19 +25,19 @@ const items = [
     icon: Home,
   },
   {
-    title: "Inbox",
+    title: "Ingredients",
     url: "#",
-    icon: Inbox,
+    icon: ScrollText,
   },
   {
-    title: "Calendar",
+    title: "Breads",
     url: "#",
-    icon: Calendar,
+    icon: Croissant,
   },
   {
-    title: "Search",
+    title: "Sales Report",
     url: "#",
-    icon: Search,
+    icon: ChartColumnIncreasing,
   },
   {
     title: "Settings",

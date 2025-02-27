@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ChartColumnIncreasing,
   Croissant,
@@ -16,42 +18,62 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../components/ui/sidebar";
+import Image from "next/image";
+import JUAILogo from "../public/images/juai-logo.png";
+import { useEffect, useState } from "react";
 
 // Menu items.
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/home",
     icon: Home,
   },
   {
     title: "Ingredients",
-    url: "#",
+    url: "/ingredients",
     icon: ScrollText,
   },
   {
     title: "Breads",
-    url: "#",
+    url: "/breads",
     icon: Croissant,
   },
   {
     title: "Sales Report",
-    url: "#",
+    url: "/sales-report",
     icon: ChartColumnIncreasing,
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: Settings,
   },
 ];
 
 export function AppSidebar() {
+  const [isComponentReady, setIsComponentReady] = useState(false);
+
+  useEffect(() => {
+    setIsComponentReady(true);
+  }, []);
+
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <Image
+            alt="JU&AI Bakeshop Inventory System LOGO"
+            src={JUAILogo}
+            className="mx-auto h-44 w-auto"
+            style={{ marginBottom: isComponentReady ? "16px" : "" }}
+            priority
+          />
+          <SidebarGroupLabel
+            style={{ marginBottom: isComponentReady ? "16px" : "" }}
+          >
+            JU&AI Bakeshop Inventory System
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

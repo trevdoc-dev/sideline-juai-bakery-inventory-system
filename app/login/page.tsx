@@ -1,6 +1,6 @@
 "use client";
 
-import LoginForm from "@/components/login/LoginForm";
+import LoginForm from "../../components/login/LoginForm";
 import { useAuth } from "@/context/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,7 +11,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.replace("/dashboard");
+      router.replace("/authenticated");
     }
   }, [user, router]);
 

@@ -7,7 +7,6 @@ import {
   ScrollText,
   Settings,
 } from "lucide-react";
-
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +20,8 @@ import {
 import Image from "next/image";
 import JUAILogo from "../public/images/juai-logo.png";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation"; // Import for checking active path
+import Link from "next/link";
 
 // Menu items.
 const items = [
@@ -53,6 +54,7 @@ const items = [
 
 export function AppSidebar() {
   const [isComponentReady, setIsComponentReady] = useState(false);
+  const pathname = usePathname(); // Get current path
 
   useEffect(() => {
     setIsComponentReady(true);
@@ -76,16 +78,31 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive = pathname === item.url; // Check if current page matches
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        href={item.url}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-md ${
+                          isActive
+                            ? "bg-gray-200 text-gray-900 font-bold"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        <item.icon
+                          className={`h-5 w-5 ${
+                            isActive ? "text-gray-900" : "text-gray-500"
+                          }`}
+                        />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

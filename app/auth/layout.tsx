@@ -12,7 +12,7 @@ export default function AuthenticatedLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarTrigger />
-        {children}
+        <div className="m-8 w-[70%]">{children}</div>
       </SidebarProvider>
     </AuthGuard>
   );

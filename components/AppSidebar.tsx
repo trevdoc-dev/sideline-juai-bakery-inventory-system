@@ -26,27 +26,27 @@ import { useEffect, useState } from "react";
 const items = [
   {
     title: "Home",
-    url: "/home",
+    url: "/auth/dashboard",
     icon: Home,
   },
   {
     title: "Ingredients",
-    url: "/ingredients",
+    url: "/auth/ingredients",
     icon: ScrollText,
   },
   {
     title: "Breads",
-    url: "/breads",
+    url: "/auth/breads",
     icon: Croissant,
   },
   {
     title: "Sales Report",
-    url: "/sales-report",
+    url: "/auth/sales-report",
     icon: ChartColumnIncreasing,
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/auth/settings",
     icon: Settings,
   },
 ];

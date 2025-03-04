@@ -33,15 +33,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+interface BreadModel {
+  id: number;
+  name: string;
+  image_url: string;
+  price: number;
+  created_at: string;
+}
 
 export default function BreadPage() {
-  const headers = ["ID", "Name", "Price"];
-  const [invoices, setInvoices] = useState([
-    { ID: "INV001", Name: "Cheese Bread", Price: "250" },
-    { ID: "INV002", Name: "Pandesal", Price: "150" },
-    { ID: "INV003", Name: "Ensaymada", Price: "350" },
-  ]);
+  const headers = ["id", "name", "image_url", "price"];
+  const [invoices, setInvoices] = useState<BreadModel[]>([]);
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
@@ -104,6 +109,19 @@ export default function BreadPage() {
     }
     setIsSheetOpen(false);
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("breads").select("*");
+      if (error) {
+        console.error("Error fetching breads:", error);
+      } else {
+        setInvoices(data);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>

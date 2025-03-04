@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { CustomTable } from "@/components/CustomTable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -33,35 +35,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-
-interface BreadModel {
-  id: number | string;
-  name: string;
-  image_url: string;
-  price: number;
-  created_at: string;
-}
+import { BreadInterface } from "@/interfaces/bread";
 
 export default function BreadPage() {
-  const headers = ["id", "name", "image_url", "price"];
-  const [invoices, setInvoices] = useState<BreadModel[]>([]);
-
+  const headers = ["id", "name", "price"];
+  const [breads, setBreads] = useState<BreadInterface[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
   const [selectedRow, setSelectedRow] = useState<{
-    id: number;
+    id?: string;
     name: string;
     price: number;
   } | null>(null);
   const [deleteRow, setDeleteRow] = useState<{
-    ID: number | string;
-    Name: string;
+    id: string;
+    name: string;
   } | null>(null);
 
   const BreadSchema = z.object({
-    id: z.number(),
     name: z.string().min(2).max(50),
     price: z.coerce.number().min(1),
   });
@@ -69,11 +60,35 @@ export default function BreadPage() {
   const form = useForm<z.infer<typeof BreadSchema>>({
     resolver: zodResolver(BreadSchema),
     defaultValues: {
-      id: 0,
       name: "",
       price: 0,
     },
   });
+
+  // Fetch breads from Supabase
+  useEffect(() => {
+    const fetchBreads = async () => {
+      const { data, error } = await supabase.from("breads").select("*");
+      if (error) console.error(error);
+      else setBreads(data || []);
+    };
+
+    fetchBreads();
+
+    // Realtime Subscription
+    const subscription = supabase
+      .channel("breads")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "breads" },
+        fetchBreads
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
 
   const openSheetForAdd = () => {
     setSheetMode("add");
@@ -84,13 +99,13 @@ export default function BreadPage() {
 
   const openSheetForEdit = (row: Record<string, any>) => {
     setSheetMode("edit");
-    setSelectedRow({ id: row.id, name: row.Name, price: Number(row.Price) });
-    form.reset({ name: row.Name, price: Number(row.Price) });
+    setSelectedRow({ id: row.id, name: row.name, price: Number(row.price) });
+    form.reset({ name: row.name, price: Number(row.price) });
     setIsSheetOpen(true);
   };
 
   const confirmDelete = (row: Record<string, any>) => {
-    setDeleteRow({ ID: row.ID, Name: row.Name });
+    setDeleteRow({ id: row.id, name: row.name });
   };
 
   const handleDelete = async () => {
@@ -99,69 +114,36 @@ export default function BreadPage() {
     const { error } = await supabase
       .from("breads")
       .delete()
-      .eq("id", deleteRow.ID);
+      .match({ id: deleteRow.id });
 
-    if (error) {
-      console.error("Error deleting bread:", error);
-    } else {
-      setInvoices((prev) => prev.filter((item) => item.id !== deleteRow.ID));
-    }
-
+    if (error) console.error(error);
     setDeleteRow(null);
   };
 
   const onSubmit = async (values: z.infer<typeof BreadSchema>) => {
     if (sheetMode === "add") {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("breads")
-        .insert([{ name: values.name, price: values.price }])
-        .select();
-
-      if (error) {
-        console.error("Error adding bread:", error);
-      } else {
-        setInvoices((prev) => [...prev, ...data]);
-      }
-    } else {
-      // Editing an existing bread
-      const { data, error } = await supabase
+        .insert([
+          { name: values.name, price: values.price, image_url: "empty" },
+        ]);
+      if (error) console.error(error);
+    } else if (selectedRow?.id) {
+      const { error } = await supabase
         .from("breads")
         .update({ name: values.name, price: values.price })
-        .eq("id", selectedRow?.id)
-        .select();
-
-      if (error) {
-        console.error("Error updating bread:", error);
-      } else {
-        setInvoices((prev) =>
-          prev.map((item) => (item.id === selectedRow?.id ? data[0] : item))
-        );
-      }
+        .match({ id: selectedRow.id });
+      if (error) console.error(error);
     }
 
     setIsSheetOpen(false);
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase.from("breads").select("*");
-      if (error) {
-        console.error("Error fetching breads:", error);
-      } else {
-        setInvoices(data);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <div>
       {/* Header */}
       <div className="flex justify-between">
         <h1 className="text-2xl font-semibold mb-8">Manage Breads</h1>
-
-        {/* Add Button */}
         <Button size="lg" onClick={openSheetForAdd}>
           <Plus /> Add Bread
         </Button>
@@ -181,7 +163,7 @@ export default function BreadPage() {
       <CustomTable
         caption="A list of available breads."
         headers={headers}
-        data={invoices}
+        data={breads}
         onEdit={openSheetForEdit}
         onDelete={confirmDelete}
       />
@@ -257,7 +239,7 @@ export default function BreadPage() {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. You will remove{" "}
-                <b>{deleteRow.Name}</b> from the list.
+                <b>{deleteRow.name}</b> from the list.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

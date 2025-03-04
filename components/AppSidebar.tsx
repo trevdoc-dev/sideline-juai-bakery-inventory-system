@@ -71,10 +71,14 @@ export function AppSidebar() {
             style={{ marginBottom: isComponentReady ? "16px" : "" }}
             priority
           />
+          <SidebarGroupLabel className="text-sm font-bold mx-auto">
+            JU&AI Bakeshop
+          </SidebarGroupLabel>
           <SidebarGroupLabel
             style={{ marginBottom: isComponentReady ? "16px" : "" }}
+            className="text-sm font-bold mx-auto -translate-y-3"
           >
-            JU&AI Bakeshop Inventory System
+            Inventory System
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

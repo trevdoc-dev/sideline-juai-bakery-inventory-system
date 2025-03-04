@@ -84,7 +84,7 @@ export default function BreadPage() {
 
   const openSheetForEdit = (row: Record<string, any>) => {
     setSheetMode("edit");
-    setSelectedRow({ name: row.Name, price: Number(row.Price) });
+    setSelectedRow({ id: row.id, name: row.Name, price: Number(row.Price) });
     form.reset({ name: row.Name, price: Number(row.Price) });
     setIsSheetOpen(true);
   };

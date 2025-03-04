@@ -93,13 +93,19 @@ export default function BreadPage() {
     setDeleteRow({ ID: row.ID, Name: row.Name });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteRow) return;
 
-    console.log("Deleting:", deleteRow);
+    const { error } = await supabase
+      .from("breads")
+      .delete()
+      .eq("id", deleteRow.ID);
 
-    // Simulating API call
-    setInvoices((prev) => prev.filter((item) => item.ID !== deleteRow.ID));
+    if (error) {
+      console.error("Error deleting bread:", error);
+    } else {
+      setInvoices((prev) => prev.filter((item) => item.ID !== deleteRow.ID));
+    }
 
     setDeleteRow(null);
   };

@@ -37,7 +37,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface BreadModel {
-  id: number;
+  id: number | string;
   name: string;
   image_url: string;
   price: number;
@@ -104,7 +104,7 @@ export default function BreadPage() {
     if (error) {
       console.error("Error deleting bread:", error);
     } else {
-      setInvoices((prev) => prev.filter((item) => item.ID !== deleteRow.ID));
+      setInvoices((prev) => prev.filter((item) => item.id !== deleteRow.ID));
     }
 
     setDeleteRow(null);

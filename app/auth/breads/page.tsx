@@ -56,7 +56,7 @@ export default function BreadPage() {
     price: number;
   } | null>(null);
   const [deleteRow, setDeleteRow] = useState<{
-    ID: string;
+    ID: number | string;
     Name: string;
   } | null>(null);
 

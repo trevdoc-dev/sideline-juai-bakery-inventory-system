@@ -44,17 +44,15 @@ export function CustomTable({
       <TableBody>
         {data.map((row, rowIndex) => (
           <TableRow key={rowIndex}>
-            <TableCell>
-              {row.image_url ? (
+            {row.image_url && (
+              <TableCell>
                 <img
                   src={row.image_url ?? ""}
                   alt="..."
                   className="w-[40px] object-cover rounded-md"
                 />
-              ) : (
-                "-"
-              )}
-            </TableCell>
+              </TableCell>
+            )}
             {headers.map(
               (header, colIndex) =>
                 header.name !== "image_url" && (

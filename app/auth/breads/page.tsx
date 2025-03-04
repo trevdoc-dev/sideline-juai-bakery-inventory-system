@@ -81,8 +81,8 @@ export default function BreadPage() {
     setIsSheetOpen(true);
   };
 
-  const confirmDelete = (row: { ID: string; Name: string }) => {
-    setDeleteRow(row);
+  const confirmDelete = (row: Record<string, any>) => {
+    setDeleteRow({ ID: row.ID, Name: row.Name });
   };
 
   const handleDelete = () => {

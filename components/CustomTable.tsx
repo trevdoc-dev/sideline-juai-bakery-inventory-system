@@ -44,14 +44,30 @@ export function CustomTable({
       <TableBody>
         {data.map((row, rowIndex) => (
           <TableRow key={rowIndex}>
-            {headers.map((header, colIndex) => (
-              <TableCell
-                key={colIndex}
-                className={colIndex === headers.length - 1 ? "text-right" : ""}
-              >
-                {row[header.name] || "-"}
-              </TableCell>
-            ))}
+            <TableCell>
+              {row.image_url ? (
+                <img
+                  src={row.image_url ?? ""}
+                  alt="..."
+                  className="w-[40px] object-cover rounded-md"
+                />
+              ) : (
+                "-"
+              )}
+            </TableCell>
+            {headers.map(
+              (header, colIndex) =>
+                header.name !== "image_url" && (
+                  <TableCell
+                    key={colIndex}
+                    className={
+                      colIndex === headers.length - 1 ? "text-right" : ""
+                    }
+                  >
+                    {row[header.name] || "-"}
+                  </TableCell>
+                )
+            )}
             <TableCell className="text-right space-x-2">
               <Button variant="outline" size="lg" onClick={() => onEdit?.(row)}>
                 <FilePenLine />

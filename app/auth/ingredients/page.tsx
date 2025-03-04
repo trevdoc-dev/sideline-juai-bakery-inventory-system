@@ -114,7 +114,7 @@ export default function IngredientPage() {
       quantity: 0,
       unit: "",
       threshold: 0,
-      expiry_date: 0,
+      expiry_date: new Date(),
     });
     setIsSheetOpen(true);
   };
@@ -300,7 +300,11 @@ export default function IngredientPage() {
                     <FormItem>
                       <FormLabel>Expiry Date</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value.toISOString().split("T")[0]}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

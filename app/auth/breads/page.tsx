@@ -39,6 +39,7 @@ import { BreadInterface } from "@/interfaces/bread";
 
 export default function BreadPage() {
   const headers = [
+    { name: "image_url", label: "Image" },
     { name: "id", label: "ID" },
     { name: "name", label: "Name" },
     { name: "price", label: "Price" },

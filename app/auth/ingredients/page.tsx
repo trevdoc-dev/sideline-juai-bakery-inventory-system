@@ -300,11 +300,7 @@ export default function IngredientPage() {
                     <FormItem>
                       <FormLabel>Expiry Date</FormLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          {...field}
-                          value={field.value.toISOString().split("T")[0]}
-                        />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

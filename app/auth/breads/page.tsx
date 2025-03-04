@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, Plus, Upload } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,6 +50,7 @@ export default function BreadPage() {
     id?: string;
     name: string;
     price: number;
+    image_url?: string;
   } | null>(null);
   const [deleteRow, setDeleteRow] = useState<{
     id: string;
@@ -59,6 +60,7 @@ export default function BreadPage() {
   const BreadSchema = z.object({
     name: z.string().min(2).max(50),
     price: z.coerce.number().min(1),
+    image: z.instanceof(File).optional(),
   });
 
   const form = useForm<z.infer<typeof BreadSchema>>({
@@ -66,6 +68,7 @@ export default function BreadPage() {
     defaultValues: {
       name: "",
       price: 0,
+      image: undefined,
     },
   });
 
@@ -94,16 +97,46 @@ export default function BreadPage() {
     };
   }, []);
 
+  const uploadToCloudinary = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+    );
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      return data.secure_url || null;
+    } catch (error) {
+      console.error("Cloudinary Upload Error:", error);
+      return null;
+    }
+  };
+
   const openSheetForAdd = () => {
     setSheetMode("add");
     setSelectedRow(null);
-    form.reset({ name: "", price: 0 });
+    form.reset({ name: "", price: 0, image: undefined });
     setIsSheetOpen(true);
   };
 
   const openSheetForEdit = (row: Record<string, any>) => {
     setSheetMode("edit");
-    setSelectedRow({ id: row.id, name: row.name, price: Number(row.price) });
+    setSelectedRow({
+      id: row.id,
+      name: row.name,
+      price: Number(row.price),
+      image_url: row.image_url,
+    });
     form.reset({ name: row.name, price: Number(row.price) });
     setIsSheetOpen(true);
   };
@@ -125,17 +158,28 @@ export default function BreadPage() {
   };
 
   const onSubmit = async (values: z.infer<typeof BreadSchema>) => {
+    let imageUrl = selectedRow?.image_url || null;
+
+    if (values.image) {
+      const uploadedUrl = await uploadToCloudinary(values.image);
+      if (!uploadedUrl) {
+        console.error("Image upload failed.");
+        return;
+      }
+      imageUrl = uploadedUrl;
+    }
+
     if (sheetMode === "add") {
       const { error } = await supabase
         .from("breads")
         .insert([
-          { name: values.name, price: values.price, image_url: "empty" },
+          { name: values.name, price: values.price, image_url: imageUrl },
         ]);
       if (error) console.error(error);
     } else if (selectedRow?.id) {
       const { error } = await supabase
         .from("breads")
-        .update({ name: values.name, price: values.price })
+        .update({ name: values.name, price: values.price, image_url: imageUrl })
         .match({ id: selectedRow.id });
       if (error) console.error(error);
     }
@@ -145,7 +189,6 @@ export default function BreadPage() {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex justify-between">
         <h1 className="text-2xl font-semibold mb-8">Manage Breads</h1>
         <Button size="lg" onClick={openSheetForAdd}>
@@ -153,17 +196,6 @@ export default function BreadPage() {
         </Button>
       </div>
 
-      {/* Alert */}
-      <Alert variant="destructive" className="mb-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle className="font-bold">Alert</AlertTitle>
-        <AlertDescription>
-          You're out of stocks for these products: Cheese Bread, Pandesal,
-          Ensaymada.
-        </AlertDescription>
-      </Alert>
-
-      {/* Table */}
       <CustomTable
         caption="A list of available breads."
         headers={headers}
@@ -172,7 +204,6 @@ export default function BreadPage() {
         onDelete={confirmDelete}
       />
 
-      {/* Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent>
           <SheetHeader>
@@ -181,8 +212,8 @@ export default function BreadPage() {
             </SheetTitle>
             <SheetDescription>
               {sheetMode === "add"
-                ? "Add a new bread that will be available in the store."
-                : "Update the details of this bread."}
+                ? "Add a new bread."
+                : "Update bread details."}
             </SheetDescription>
           </SheetHeader>
 
@@ -192,7 +223,6 @@ export default function BreadPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                {/* Name Field */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -206,7 +236,7 @@ export default function BreadPage() {
                     </FormItem>
                   )}
                 />
-                {/* Price Field */}
+
                 <FormField
                   control={form.control}
                   name="price"
@@ -220,7 +250,20 @@ export default function BreadPage() {
                     </FormItem>
                   )}
                 />
-                {/* Submit Button */}
+
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        form.setValue("image", e.target.files?.[0])
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+
                 <Button type="submit" className="w-full" size="lg">
                   {sheetMode === "add" ? "Add" : "Save Changes"}
                 </Button>

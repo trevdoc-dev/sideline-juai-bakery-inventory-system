@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Plus, Upload } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -196,6 +196,15 @@ export default function BreadPage() {
           <Plus /> Add Bread
         </Button>
       </div>
+
+      {/* Alert */}
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle className="font-bold">Alert</AlertTitle>
+        <AlertDescription>
+          You're out of stock for some ingredients: Sugar, Salt, and Pepper.
+        </AlertDescription>
+      </Alert>
 
       <CustomTable
         caption="A list of available breads."

@@ -51,6 +51,7 @@ export default function BreadPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
   const [selectedRow, setSelectedRow] = useState<{
+    id: number;
     name: string;
     price: number;
   } | null>(null);
@@ -60,6 +61,7 @@ export default function BreadPage() {
   } | null>(null);
 
   const BreadSchema = z.object({
+    id: z.number(),
     name: z.string().min(2).max(50),
     price: z.coerce.number().min(1),
   });
@@ -67,6 +69,7 @@ export default function BreadPage() {
   const form = useForm<z.infer<typeof BreadSchema>>({
     resolver: zodResolver(BreadSchema),
     defaultValues: {
+      id: 0,
       name: "",
       price: 0,
     },
@@ -101,14 +104,37 @@ export default function BreadPage() {
     setDeleteRow(null);
   };
 
-  function onSubmit(values: z.infer<typeof BreadSchema>) {
+  const onSubmit = async (values: z.infer<typeof BreadSchema>) => {
     if (sheetMode === "add") {
-      console.log("Adding:", values);
+      const { data, error } = await supabase
+        .from("breads")
+        .insert([{ name: values.name, price: values.price }])
+        .select();
+
+      if (error) {
+        console.error("Error adding bread:", error);
+      } else {
+        setInvoices((prev) => [...prev, ...data]);
+      }
     } else {
-      console.log("Editing:", values);
+      // Editing an existing bread
+      const { data, error } = await supabase
+        .from("breads")
+        .update({ name: values.name, price: values.price })
+        .eq("id", selectedRow?.id)
+        .select();
+
+      if (error) {
+        console.error("Error updating bread:", error);
+      } else {
+        setInvoices((prev) =>
+          prev.map((item) => (item.id === selectedRow?.id ? data[0] : item))
+        );
+      }
     }
+
     setIsSheetOpen(false);
-  }
+  };
 
   useEffect(() => {
     const fetchData = async () => {

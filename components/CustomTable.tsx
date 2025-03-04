@@ -7,14 +7,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { FilePenLine, Trash } from "lucide-react";
 
 interface TableProps {
   caption?: string;
   headers: string[];
   data: Record<string, any>[];
+  onEdit?: (row: Record<string, any>) => void;
+  onDelete?: (row: Record<string, any>) => void;
 }
 
-export function CustomTable({ caption, headers, data }: TableProps) {
+export function CustomTable({
+  caption,
+  headers,
+  data,
+  onEdit,
+  onDelete,
+}: TableProps) {
   return (
     <Table>
       {caption && <TableCaption>{caption}</TableCaption>}
@@ -28,6 +38,7 @@ export function CustomTable({ caption, headers, data }: TableProps) {
               {header}
             </TableHead>
           ))}
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -41,6 +52,20 @@ export function CustomTable({ caption, headers, data }: TableProps) {
                 {row[header] || "-"}
               </TableCell>
             ))}
+            <TableCell className="text-right space-x-2">
+              <Button variant="outline" size="lg" onClick={() => onEdit?.(row)}>
+                <FilePenLine />
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="lg"
+                onClick={() => onDelete?.(row)}
+              >
+                <Trash />
+                Delete
+              </Button>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

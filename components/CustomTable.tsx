@@ -12,7 +12,7 @@ import { FilePenLine, Trash } from "lucide-react";
 
 interface TableProps {
   caption?: string;
-  headers: string[];
+  headers: { name: string; label: string }[];
   data: Record<string, any>[];
   onEdit?: (row: Record<string, any>) => void;
   onDelete?: (row: Record<string, any>) => void;
@@ -35,7 +35,7 @@ export function CustomTable({
               key={index}
               className={index === headers.length - 1 ? "text-right" : ""}
             >
-              {header}
+              {header.label}
             </TableHead>
           ))}
           <TableHead className="text-right">Actions</TableHead>
@@ -49,7 +49,7 @@ export function CustomTable({
                 key={colIndex}
                 className={colIndex === headers.length - 1 ? "text-right" : ""}
               >
-                {row[header] || "-"}
+                {row[header.name] || "-"}
               </TableCell>
             ))}
             <TableCell className="text-right space-x-2">

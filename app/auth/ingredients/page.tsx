@@ -39,12 +39,12 @@ import { IngredientInterface } from "@/interfaces/ingredient";
 
 export default function IngredientPage() {
   const headers = [
-    "id",
-    "name",
-    "quantity",
-    "unit",
-    "threshold",
-    "expiry_date",
+    { name: "id", label: "ID" },
+    { name: "name", label: "Name" },
+    { name: "quantity", label: "Quantity" },
+    { name: "unit", label: "Unit" },
+    { name: "threshold", label: "Threshold" },
+    { name: "expiry_date", label: "Expiry Date" },
   ];
   const [ingredients, setIngredients] = useState<IngredientInterface[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);

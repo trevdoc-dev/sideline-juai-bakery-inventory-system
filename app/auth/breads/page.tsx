@@ -38,7 +38,11 @@ import {
 import { BreadInterface } from "@/interfaces/bread";
 
 export default function BreadPage() {
-  const headers = ["id", "name", "price"];
+  const headers = [
+    { name: "id", label: "ID" },
+    { name: "name", label: "Name" },
+    { name: "price", label: "Price" },
+  ];
   const [breads, setBreads] = useState<BreadInterface[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");

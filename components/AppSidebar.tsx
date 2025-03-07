@@ -6,6 +6,7 @@ import {
   Home,
   ScrollText,
   Settings,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,8 +21,9 @@ import {
 import Image from "next/image";
 import JUAILogo from "../public/images/juai-logo.png";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation"; // Import for checking active path
+import { usePathname } from "next/navigation"; // Get current path
 import Link from "next/link";
+import { useAuth } from "@/context/AuthProvider"; // Import auth hook
 
 // Menu items.
 const items = [
@@ -45,16 +47,12 @@ const items = [
     url: "/auth/sales-report",
     icon: ChartColumnIncreasing,
   },
-  {
-    title: "Settings",
-    url: "/auth/settings",
-    icon: Settings,
-  },
 ];
 
 export function AppSidebar() {
   const [isComponentReady, setIsComponentReady] = useState(false);
   const pathname = usePathname(); // Get current path
+  const { logout } = useAuth(); // Get logout function
 
   useEffect(() => {
     setIsComponentReady(true);
@@ -107,6 +105,40 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+
+              {/* Settings */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href="/auth/settings"
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md ${
+                      pathname === "/auth/settings"
+                        ? "bg-gray-200 text-gray-900 font-bold"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Settings
+                      className={`h-5 w-5 ${
+                        pathname === "/auth/settings"
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    />
+                    <span>Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Logout Button */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={logout}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-red-600 hover:bg-red-100"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Logout</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

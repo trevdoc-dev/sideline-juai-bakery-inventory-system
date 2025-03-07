@@ -19,7 +19,7 @@ export default async function handler(
   // Find user by email
   const { data: user, error } = await supabase
     .from("users")
-    .select("id, email, password")
+    .select("id, email, password, role")
     .eq("email", email)
     .single();
 
@@ -32,9 +32,13 @@ export default async function handler(
     return res.status(401).json({ message: "Invalid email or password" });
 
   // Generate JWT Token
-  const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(
+    { userId: user.id, email: user.email, role: user.role },
+    SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   res.status(200).json({ message: "Login successful", token });
 }

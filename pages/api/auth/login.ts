@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 
-const SECRET_KEY = process.env.JWT_SECRET!; // Set this in .env.local
+const SECRET_KEY = process.env.NEXT_PUBLIC_JWT_SECRET!; // Set this in .env.local
 
 export default async function handler(
   req: NextApiRequest,

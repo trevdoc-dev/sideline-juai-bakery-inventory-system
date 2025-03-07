@@ -82,6 +82,7 @@ export default function LoginForm() {
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input
+                      autoFocus={true}
                       placeholder="Email address"
                       {...field}
                       className={
